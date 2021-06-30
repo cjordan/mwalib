@@ -1,0 +1,55 @@
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.build_release]
+command = "cargo"
+args = ["build", "--release", "--features", "header"]
+
+[tasks.linux_install]
+dependencies = ["clean", "build_release"]
+script_runner = "@shell"
+script = '''
+[[ $# -ne 1 ]] && echo "ERROR: Need exactly one argument as the prefix for installation" && exit 1
+# If the prefix directories can\'t be made, then try with sudo.
+MWALIB_HEADER=$(find . -type f -name mwalib.h)
+mkdir -p ${1}/include ${1}/lib || ROOT_NEEDED=1
+
+if [[ $ROOT_NEEDED == 1 ]]; then
+    echo "Cannot write to ${1}, using sudo"
+    sudo mkdir -p ${1}/include ${1}/lib
+    sudo cp $MWALIB_HEADER ${1}/include
+    sudo cp target/release/libmwalib.so target/release/libmwalib.a ${1}/lib
+else
+    cp $MWALIB_HEADER ${1}/include
+    cp target/release/libmwalib.so target/release/libmwalib.a ${1}/lib
+fi
+'''
+
+[tasks.mac_install]
+dependencies = ["clean", "build_release"]
+script_runner = "@shell"
+script = '''
+[[ $# -ne 1 ]] && echo "ERROR: Need exactly one argument as the prefix for installation" && exit 1
+# If the prefix directories can\'t be made, then try with sudo.
+MWALIB_HEADER=$(find . -type f -name mwalib.h)
+mkdir -p ${1}/include ${1}/lib || ROOT_NEEDED=1
+
+if [[ $ROOT_NEEDED == 1 ]]; then
+    echo "Cannot write to ${1}, using sudo"
+    sudo mkdir -p ${1}/include ${1}/lib
+    sudo cp $MWALIB_HEADER ${1}/include
+    sudo cp target/release/libmwalib.dylib target/release/libmwalib.a ${1}/lib
+else
+    cp $MWALIB_HEADER ${1}/include
+    cp target/release/libmwalib.dylib target/release/libmwalib.a ${1}/lib
+fi
+'''
+
+[tasks.install]
+linux_alias = "linux_install"
+mac_alias = "mac_install"

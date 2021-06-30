@@ -24,6 +24,9 @@ jobs:
           toolchain: stable
           override: true
 
+    - name: Install Cargo Make
+      uses: davidB/rust-cargo-make@v1
+
     - name: Build cfitsio
       run: |
           # Install dependencies
@@ -42,12 +45,12 @@ jobs:
           cd ..
 
     - name: Build mwalib release
-      run: MWALIB_LINK_STATIC_CFITSIO=1 cargo build --release
+      # x86-64-v2 contains SSE2 and SSSE3.
+      # More info: https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
+      run: RUSTFLAGS="-C target-cpu=x86-64-v2" MWALIB_LINK_STATIC_CFITSIO=1 cargo make install .
 
     - name: Create release tarball
-      run: |
-          mv target/release/libmwalib.{a,so} include/mwalib.h .
-          tar -acvf mwalib-$(git describe --tags)-linux_x86_64.tar.gz LICENSE LICENSE-cfitsio CHANGELOG.md libmwalib.{a,so} mwalib.h
+      run: tar -acvf mwalib-$(git describe --tags)-linux_x86_64.tar.gz LICENSE LICENSE-cfitsio CHANGELOG.md libmwalib.{a,so} mwalib.h
 
     - name: Upload tarball
       uses: actions/upload-artifact@v2
@@ -81,6 +84,9 @@ jobs:
           toolchain: stable
           override: true
     
+    - name: Install Cargo Make
+      uses: davidB/rust-cargo-make@v1
+
     - name: Build cfitsio
       run: |
           # Install dependencies
@@ -98,12 +104,12 @@ jobs:
           cd ..
 
     - name: Build mwalib release
-      run: MWALIB_LINK_STATIC_CFITSIO=1 cargo build --release
+      # x86-64-v2 contains SSE2 and SSSE3.
+      # More info: https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
+      run: RUSTFLAGS="-C target-cpu=x86-64-v2" MWALIB_LINK_STATIC_CFITSIO=1 cargo make install .
 
     - name: Create release tarball
-      run: |
-          mv target/release/libmwalib.{a,dylib} include/mwalib.h .
-          tar -acvf mwalib-$(git describe --tags)-macosx.tar.gz LICENSE LICENSE-cfitsio CHANGELOG.md libmwalib.{a,dylib} mwalib.h
+      run: tar -acvf mwalib-$(git describe --tags)-macosx.tar.gz LICENSE LICENSE-cfitsio CHANGELOG.md libmwalib.{a,dylib} mwalib.h
 
     - name: Upload tarball
       uses: actions/upload-artifact@v2

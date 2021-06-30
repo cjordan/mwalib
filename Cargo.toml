@@ -24,6 +24,9 @@ codegen-units = 1
 crate-type = ["rlib", "staticlib", "cdylib"]
 
 [features]
+default = []
+# Make a C/C++ compatible header
+header = ["cbindgen"]
 # Compile cfitsio from source and link it statically.
 cfitsio-static = ["fitsio-sys/fitsio-src"]
 
@@ -44,8 +47,7 @@ csv = "1.1.*"
 float-cmp = "0.8.*"
 structopt = "0.3.*"
 tempdir = "0.3.*"
-cbindgen = "0.*"
 
 [build-dependencies]
 built = "0.*"
-cbindgen = "0.*"
+cbindgen = { version = "0.*", optional = true }

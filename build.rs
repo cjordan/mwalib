@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 use std::env;
 
 // This code is adapted from pkg-config-rs
@@ -35,25 +39,26 @@ fn main() {
         println!("cargo:rustc-link-lib=static=cfitsio");
     }
 
-    // Generate a C header for mwalib and write it to the include directory.
-    // This routine only need to be done if the ffi module has changed.
-    println!("cargo:rerun-if-changed=src/ffi/mod.rs");
-    // Only do this if we're not on docs.rs (doesn't like writing files outside
-    // of OUT_DIR).
-    match env::var("DOCS_RS").as_deref() {
-        Ok("1") => (),
-        _ => {
-            cbindgen::Builder::new()
-                .with_config(cbindgen::Config {
-                    cpp_compat: true,
-                    pragma_once: true,
-                    ..Default::default()
-                })
-                .with_crate(env::var("CARGO_MANIFEST_DIR").unwrap())
-                .with_language(cbindgen::Language::C)
-                .generate()
-                .expect("Unable to generate bindings")
-                .write_to_file("include/mwalib.h");
-        }
+    #[cfg(feature = "cbindgen")]
+    {
+        use std::path::PathBuf;
+
+        // Generate a C header for mwalib and write it to the include directory.
+        // This routine only need to be done if the ffi module has changed.
+        println!("cargo:rerun-if-changed=src/ffi/mod.rs");
+        let out_dir =
+            PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR env. variable not defined!"));
+        let header = out_dir.join("mwalib.h");
+        cbindgen::Builder::new()
+            .with_config(cbindgen::Config {
+                cpp_compat: true,
+                pragma_once: true,
+                ..Default::default()
+            })
+            .with_crate(env::var("CARGO_MANIFEST_DIR").unwrap())
+            .with_language(cbindgen::Language::C)
+            .generate()
+            .expect("Unable to generate bindings")
+            .write_to_file(&header);
     }
 }

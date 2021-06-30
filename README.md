@@ -26,6 +26,8 @@ There are also a couple of simple examples Python scripts here that use mwalib's
 
 ## Usage in Rust
 
+Use the latest version on [crates.io](https://crates.io/crates/mwalib).
+
 In the `examples` directory, see `mwalib-print-obs-context.rs` and
 `mwalib-print-obs-context.rs` for examples. Also run `cargo doc --open` to see
 the rendered documentation.
@@ -83,6 +85,10 @@ You can build mwalib from source:
 
     `https://www.rust-lang.org/tools/install`
 
+- Install `cargo-make`
+
+    `cargo install cargo-make`
+
 - Install cfitsio
     If using a package manager install the `cfitsio-dev` package.
     If building from source ensure you build it with with `--enable-reentrant` option.
@@ -91,7 +97,11 @@ You can build mwalib from source:
 
 - Compile the source
 
-    `cargo build --release`
+    `cargo make install /path/to/prefix`
+
+    This will create directories `/include` and `/lib` on the prefix directory
+    (if they don't already exist) and populate them with mwalib C objects.
+    `sudo` will be used if your user can't write to the prefix directory.
 
 - Statically-linking cfitsio
     If any of the MWALIB_LINK_STATIC_CFITSIO, STATIC_CFITSIO or PKG_CONFIG_ALL_STATIC environment variables exist and are set to a non-zero value, rustc will statically link libcfitsio. The default is to dynamically link libcfitsio. This is an attempt to give developers the choice of having a static or dynamic link of the fits library to ease the build and deploy process.
